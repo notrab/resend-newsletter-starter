@@ -9,7 +9,7 @@ export default defineConfig({
   integrations: [icon()],
   output: "server",
   adapter: vercel(),
-  site: process.env.VERCEL_PROJECT_PRODUCTION_URL,
+  // site: process.env.VERCEL_PROJECT_PRODUCTION_URL || "http://localhost:4321",
   env: {
     schema: {
       RESEND_API_KEY: envField.string({ context: "server", access: "secret" }),
