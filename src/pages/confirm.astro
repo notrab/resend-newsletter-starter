@@ -1,0 +1,78 @@
+---
+import { actions } from "astro:actions";
+import { Icon } from "astro-icon/components";
+
+import Layout from "../layouts/Layout.astro";
+
+const contactId = Astro.url.searchParams.get("contactId");
+
+let result: any = null;
+let error: string | null = null;
+
+if (contactId) {
+  try {
+    result = await Astro.callAction(actions.confirmSubscription, { contactId });
+  } catch (err) {
+    error = "An unexpected error occurred. Please try again.";
+  }
+} else {
+  error = "Invalid confirmation link.";
+}
+---
+
+<Layout title="Newsletter Confirmation">
+  <div
+    class="grid grid-cols-1 lg:grid-cols-2 lg:divide-x lg:divide-[var(--input-border)] h-full"
+  >
+    <div class="relative flex flex-col justify-center p-6">
+      <div class="max-w-lg mx-auto">
+        <Icon name="logo" class="h-16 w-auto inline-block mb-8" />
+
+        {
+          result && !result.error ? (
+            <div class="text-green-600">
+              <h1 class="text-4xl font-semibold mb-4 text-[var(--foreground)]">
+                Subscription Confirmed!
+              </h1>
+              <p class="text-[var(--secondary)] mb-8">{result.data.message}</p>
+            </div>
+          ) : (
+            <div class="text-red-600">
+              <h1 class="text-4xl font-semibold mb-4 text-[var(--foreground)]">
+                Confirmation Failed
+              </h1>
+              <p class="text-[var(--secondary)] mb-8">
+                {error || result?.error?.message || "Something went wrong."}
+              </p>
+            </div>
+          )
+        }
+
+        <a
+          href="/"
+          class="inline-block w-full py-2.5 bg-[var(--foreground)] text-[var(--background)] border-none rounded-full text-base font-medium cursor-pointer transition-colors duration-200 no-underline text-center"
+        >
+          Return to Homepage
+        </a>
+
+        <div class="lg:absolute lg:bottom-0 lg:inset-x-0 text-center p-6">
+          <span class="text-[var(--secondary)] text-sm"
+            >Made with ❤ by <a
+              class="text-[var(--foreground)]"
+              href="https://x.com/notrab">Jamie</a
+            > &amp; <a
+              class="text-[var(--foreground)]"
+              href="https://www.linkedin.com/in/soskowiec/">Serge</a
+            ></span
+          >
+        </div>
+      </div>
+    </div>
+
+    <div
+      class="hidden lg:flex flex-col justify-center items-center p-6 lg:p-32"
+    >
+      <Icon name="promo" class="w-96 h-auto" />
+    </div>
+  </div>
+</Layout>

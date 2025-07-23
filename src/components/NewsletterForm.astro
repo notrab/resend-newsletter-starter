@@ -1,0 +1,238 @@
+---
+import { REQUIRE_CONFIRMATION } from "astro:env/server";
+import { actions, isInputError } from "astro:actions";
+
+const result = Astro.getActionResult(actions.subscribe);
+const isSuccess = result && !result.error;
+const inputErrors = isInputError(result?.error) ? result.error.fields : {};
+---
+
+<div id="newsletter-container">
+  {
+    isSuccess ? (
+      <div id="success-message">
+        <p class="text-[var(--foreground)] font-semibold text-lg">
+          You're now subscribed to our newsletter!
+        </p>
+      </div>
+    ) : (
+      <div id="newsletter-form">
+        <div
+          id="error-message"
+          class="hidden p-4 bg-red-50 border border-red-200 rounded-md text-red-800 mb-4"
+        >
+          <p id="error-text" />
+        </div>
+
+        {result?.error && !isInputError(result.error) && (
+          <div class="p-4 bg-red-50 border border-red-200 rounded-md text-red-800 mb-4">
+            <p>
+              {result.error.message ||
+                "Something went wrong. Please try again."}
+            </p>
+          </div>
+        )}
+
+        <form
+          method="POST"
+          action={actions.subscribe}
+          id="newsletter-form-element"
+        >
+          <div class="mb-6">
+            <label for="firstName" class="block mb-2 text-[var(--primary)]">
+              First Name *
+            </label>
+            <input
+              type="text"
+              name="firstName"
+              id="firstName"
+              placeholder="John"
+              required
+              class:list={[
+                "bg-[var(--background-accent)] w-full px-5 py-2.5 border border-[var(--input-border)] rounded-full text-base transition-all duration-200 focus:outline-none focus:border-[var(--border-accent)]",
+                { "border-red-400": inputErrors.firstName },
+              ]}
+            />
+            {inputErrors.firstName && (
+              <div class="text-red-400 text-sm mt-1">
+                {inputErrors.firstName.join(", ")}
+              </div>
+            )}
+          </div>
+
+          <div class="mb-6">
+            <label for="email" class="block mb-2 text-[var(--primary)]">
+              Email Address *
+            </label>
+            <input
+              type="email"
+              name="email"
+              id="email"
+              placeholder="your@email.com"
+              required
+              class:list={[
+                "bg-[var(--background-accent)] w-full px-5 py-2.5 border border-[var(--input-border)] rounded-full text-base transition-all duration-200 focus:outline-none focus:border-[var(--border-accent)]",
+                { "border-red-400": inputErrors.email },
+              ]}
+            />
+            {inputErrors.email && (
+              <div class="text-red-400 text-sm mt-1">
+                {inputErrors.email.join(", ")}
+              </div>
+            )}
+          </div>
+
+          <button
+            type="submit"
+            id="submit-button"
+            class="w-full py-2.5 bg-[var(--foreground)] text-[var(--background)] border-none rounded-full text-base font-medium cursor-pointer transition-colors duration-200 flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
+          >
+            <span id="button-text">Subscribe to Newsletter</span>
+            <div id="loading-spinner" class="hidden">
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                class="animate-spin"
+              >
+                <circle class="opacity-25" cx="12" cy="12" r="10" />
+                <path
+                  class="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                />
+              </svg>
+            </div>
+          </button>
+
+          {REQUIRE_CONFIRMATION && (
+            <p class="mt-3 text-sm text-[var(--secondary)] text-center">
+              You'll receive a confirmation email to verify your subscription.
+            </p>
+          )}
+        </form>
+      </div>
+    )
+  }
+</div>
+
+<script>
+  import { actions } from "astro:actions";
+
+  document.addEventListener("astro:page-load", () => {
+    const form = document.getElementById(
+      "newsletter-form-element",
+    ) as HTMLFormElement;
+    const emailInput = document.getElementById("email") as HTMLInputElement;
+    const firstNameInput = document.getElementById(
+      "firstName",
+    ) as HTMLInputElement;
+    const submitButton = document.getElementById(
+      "submit-button",
+    ) as HTMLButtonElement;
+    const buttonText = document.getElementById(
+      "button-text",
+    ) as HTMLSpanElement;
+    const loadingSpinner = document.getElementById(
+      "loading-spinner",
+    ) as HTMLDivElement;
+    const errorMessage = document.getElementById(
+      "error-message",
+    ) as HTMLDivElement;
+    const errorText = document.getElementById(
+      "error-text",
+    ) as HTMLParagraphElement;
+    const newsletterForm = document.getElementById(
+      "newsletter-form",
+    ) as HTMLDivElement;
+
+    if (!form || !emailInput || !firstNameInput || !submitButton) return;
+
+    // Enhanced form submission with progressive enhancement
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      // Reset error state
+      if (errorMessage) errorMessage.classList.add("hidden");
+      emailInput.classList.remove("border-red-400");
+      firstNameInput.classList.remove("border-red-400");
+
+      // Show loading state
+      submitButton.disabled = true;
+      buttonText.style.display = "none";
+      loadingSpinner.classList.remove("hidden");
+
+      try {
+        const formData = new FormData(form);
+        const { data, error } = await actions.subscribe(formData);
+
+        if (error) {
+          // Handle errors
+          if (error.code === "BAD_REQUEST" && error.fields) {
+            if (error.fields.email) {
+              emailInput.classList.add("border-red-400");
+            }
+            if (error.fields.firstName) {
+              firstNameInput.classList.add("border-red-400");
+            }
+
+            // Show first error message
+            const firstError =
+              error.fields.email?.[0] ||
+              error.fields.firstName?.[0] ||
+              "Please check your input";
+            if (errorText && errorMessage) {
+              errorText.textContent = firstError;
+              errorMessage.classList.remove("hidden");
+            }
+          } else {
+            if (errorText && errorMessage) {
+              errorText.textContent =
+                error.message || "Something went wrong. Please try again.";
+              errorMessage.classList.remove("hidden");
+            }
+          }
+        } else {
+          // Success - replace form with success message
+          if (newsletterForm) {
+            newsletterForm.innerHTML = `
+              <div id="success-message">
+                <p class="text-[var(--foreground)] font-semibold text-lg">
+                  Great! You're now subscribed to our newsletter!
+                </p>
+              </div>
+            `;
+          }
+        }
+      } catch (err) {
+        if (errorText && errorMessage) {
+          errorText.textContent = "Network error. Please try again.";
+          errorMessage.classList.remove("hidden");
+        }
+      } finally {
+        // Reset loading state
+        submitButton.disabled = false;
+        buttonText.style.display = "inline";
+        loadingSpinner.classList.add("hidden");
+      }
+    });
+
+    // Input validation feedback
+    emailInput.addEventListener("input", () => {
+      if (emailInput.validity.valid) {
+        emailInput.classList.remove("border-red-400");
+        if (errorMessage) errorMessage.classList.add("hidden");
+      }
+    });
+
+    firstNameInput.addEventListener("input", () => {
+      if (firstNameInput.value.trim()) {
+        firstNameInput.classList.remove("border-red-400");
+        if (errorMessage) errorMessage.classList.add("hidden");
+      }
+    });
+  });
+</script>

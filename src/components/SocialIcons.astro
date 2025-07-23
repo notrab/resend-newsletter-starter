@@ -1,0 +1,47 @@
+---
+import { Icon } from "astro-icon/components";
+import {
+  PUBLIC_TWITTER_URL,
+  PUBLIC_GITHUB_URL,
+  PUBLIC_LINKEDIN_URL,
+} from "astro:env/client";
+
+const socialLinks = [
+  {
+    name: "Twitter",
+    url: PUBLIC_TWITTER_URL,
+    icon: "mdi:twitter",
+    label: "Follow us on Twitter",
+  },
+  {
+    name: "GitHub",
+    url: PUBLIC_GITHUB_URL,
+    icon: "mdi:github",
+    label: "Check out our GitHub",
+  },
+  {
+    name: "LinkedIn",
+    url: PUBLIC_LINKEDIN_URL,
+    icon: "mdi:linkedin",
+    label: "Connect with us on LinkedIn",
+  },
+].filter((link) => link.url);
+---
+
+{
+  socialLinks.length > 0 && (
+    <div class="flex justify-center gap-4 mt-8">
+      {socialLinks.map((link) => (
+        <a
+          href={link.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label={link.label}
+        >
+          <Icon name={link.icon} class="w-5 h-5 text-[var(--foreground)]" />
+          <span class="sr-only">{link.label}</span>
+        </a>
+      ))}
+    </div>
+  )
+}

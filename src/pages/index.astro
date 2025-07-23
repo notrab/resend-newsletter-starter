@@ -1,0 +1,51 @@
+---
+import { Icon } from "astro-icon/components";
+
+import Layout from "../layouts/Layout.astro";
+import NewsletterForm from "../components/NewsletterForm.astro";
+// import SocialIcons from "../components/SocialIcons.astro";
+---
+
+<Layout
+  title="Newsletter Subscription"
+  description="Subscribe to our newsletter for the latest updates on importing core utilities from astro:actions"
+>
+  <div
+    class="grid grid-cols-1 lg:grid-cols-2 lg:divide-x lg:divide-[var(--input-border)] h-full"
+  >
+    <div class="relative flex flex-col justify-center p-6">
+      <div class="max-w-lg mx-auto">
+        <Icon name="logo" class="h-16 w-auto inline-block mb-8" />
+        <h2 class="text-4xl font-semibold mb-4 text-[var(--foreground)]">
+          Stay Updated
+        </h2>
+        <p class="text-[var(--secondary)] mb-8 max-w-2xl mx-auto">
+          Create a newsletter for whatever matters to you &mdash; a hobby,
+          project, event, wedding, or your next big ideas.
+        </p>
+
+        <NewsletterForm />
+
+        <!-- <SocialIcons /> -->
+
+        <div class="lg:absolute lg:bottom-0 lg:inset-x-0 text-center p-6">
+          <span class="text-[var(--secondary)] text-sm"
+            >Made with ❤ by <a
+              class="text-[var(--foreground)]"
+              href="https://x.com/notrab">Jamie</a
+            > &amp; <a
+              class="text-[var(--foreground)]"
+              href="https://www.linkedin.com/in/soskowiec/">Serge</a
+            ></span
+          >
+        </div>
+      </div>
+    </div>
+
+    <div
+      class="hidden lg:flex flex-col justify-center items-center p-6 lg:p-32"
+    >
+      <Icon name="promo" class="w-96 h-auto" />
+    </div>
+  </div>
+</Layout>
