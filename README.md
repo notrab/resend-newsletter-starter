@@ -1,6 +1,6 @@
 # Resend Newsletter Starter
 
-Great your own Newsletter Form with Astro, Resend and React Email!
+Create your own Newsletter Form with Astro, Resend and React Email!
 
 ![Resend Newsletter Starter](.github/cover.png)
 
